@@ -9,9 +9,14 @@ const player = $(".player");
 const progress = $("#progress");
 const nextBtn = $(".btn-next");
 const prevBtn = $(".btn-prev");
+const btnRepeat = $(".btn-repeat");
+const btnRandom = $(".btn-random");
+
 const app = {
   currentIndex: 0,
   isPlay: false,
+  isRandom: false,
+  isRepeat: false,
   songs: [
     {
       name: "Em Bên Ai Rồi",
@@ -47,9 +52,9 @@ const app = {
 
   //render playlist
   render: function () {
-    var htmls = this.songs.map((song) => {
+    var htmls = this.songs.map((song, index) => {
       return `
-        <div class="song">
+        <div class="song ${index === this.currentIndex ? "active" : ""}">
             <div class="thumb"
                 style="background-image: url('${song.image}');">
             </div>
@@ -80,7 +85,6 @@ const app = {
     heading.textContent = this.currentSong.name;
     cdThumb.style.backgroundImage = `url("${this.currentSong.image}")`;
     audio.src = this.currentSong.path;
-    console.log(audio.src);
   },
 
   // handle events
@@ -146,16 +150,48 @@ const app = {
 
     // next
     nextBtn.onclick = function () {
-      _this.next();
-      audio.play()
+      if (_this.isRandom) {
+        _this.random();
+      } else {
+        _this.next();
+      }
+      audio.play();
+      _this.render()
     };
 
     // prev
     prevBtn.onclick = function () {
-      _this.prev();
-      audio.play()
+      if (_this.isRandom) {
+        _this.random();
+      } else {
+        _this.prev();
+      }
+      audio.play();
+      _this.render()
+    };
+
+    // random
+    btnRandom.onclick = function () {
+      _this.isRandom = !_this.isRandom;
+      this.classList.toggle("active", _this.isRandom); // nếu _this.isRandom đúng thì add sai thì remove.
+    };
+
+    // ended auto next or repeat
+    audio.onended = function () {
+      if (_this.isRepeat) {
+        audio.play();
+      } else {
+        next.click();
+      }
+    };
+
+    // repeat
+    btnRepeat.onclick = function () {
+      _this.isRepeat = !_this.isRepeat;
+      btnRepeat.classList.toggle("active", _this.isRepeat);
     };
   },
+
   next: function () {
     this.currentIndex++;
     if (this.currentIndex >= this.songs.length) {
@@ -163,6 +199,7 @@ const app = {
     }
     this.loadCurrentSong();
   },
+
   prev: function () {
     this.currentIndex--;
     if (this.currentIndex < 0) {
@@ -170,6 +207,17 @@ const app = {
     }
     this.loadCurrentSong();
   },
+
+  random: function () {
+    let newIndex;
+    do {
+      newIndex = Math.floor(Math.random() * this.songs.length);
+    } while (newIndex === this.currentIndex);
+
+    this.currentIndex = newIndex;
+    this.loadCurrentSong();
+  },
+
   start: function () {
     // định nghĩa các thuộc tính của obj
     this.defineProperties();
