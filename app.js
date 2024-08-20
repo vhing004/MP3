@@ -11,6 +11,7 @@ const nextBtn = $(".btn-next");
 const prevBtn = $(".btn-prev");
 const btnRepeat = $(".btn-repeat");
 const btnRandom = $(".btn-random");
+const playlist = $(".playlist");
 
 const app = {
   currentIndex: 0,
@@ -54,7 +55,9 @@ const app = {
   render: function () {
     var htmls = this.songs.map((song, index) => {
       return `
-        <div class="song ${index === this.currentIndex ? "active" : ""}">
+        <div class="song ${
+          index === this.currentIndex ? "active" : ""
+        }" data-index="${index}">
             <div class="thumb"
                 style="background-image: url('${song.image}');">
             </div>
@@ -68,7 +71,7 @@ const app = {
         </div>
         `;
     });
-    $(".playlist").innerHTML = htmls.join("");
+    playlist.innerHTML = htmls.join("");
   },
 
   // định nghĩa obj
@@ -122,6 +125,7 @@ const app = {
     audio.onplay = function () {
       player.classList.add("playing");
       _this.isPlay = true;
+      cdThumbRotate.play();
     };
 
     // khi song đc PAUSE:
@@ -156,7 +160,7 @@ const app = {
         _this.next();
       }
       audio.play();
-      _this.render()
+      _this.render();
     };
 
     // prev
@@ -167,7 +171,7 @@ const app = {
         _this.prev();
       }
       audio.play();
-      _this.render()
+      _this.render();
     };
 
     // random
@@ -189,6 +193,21 @@ const app = {
     btnRepeat.onclick = function () {
       _this.isRepeat = !_this.isRepeat;
       btnRepeat.classList.toggle("active", _this.isRepeat);
+    };
+
+    // playlist click
+    playlist.onclick = function (e) {
+      // closest("") nhận đối số bên trong, trong trường hợp này thì khi ta truyền "song" vào thì nó chỉ click đc vào song thôi click vào các phần con của song thì cx như click vào song.
+      const songNode = e.target.closest(".song:not(.active)");
+      if (songNode || e.target.closest(".option")) {
+        if (songNode) {
+          const dataIndex = Number(songNode.getAttribute("data-index"));
+          _this.currentIndex = dataIndex;
+          _this.loadCurrentSong();
+          audio.play();
+          _this.render();
+        }
+      }
     };
   },
 
