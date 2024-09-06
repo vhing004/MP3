@@ -149,7 +149,7 @@ const app = {
     progress.oninput = function (e) {
       const seekTime = (audio.duration / 100) * e.target.value;
       audio.currentTime = seekTime;
-      audio.play()
+      audio.play();
       //currentTime can get time of audio & Set time cho audio
     };
 
