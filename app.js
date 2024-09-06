@@ -185,7 +185,7 @@ const app = {
       if (_this.isRepeat) {
         audio.play();
       } else {
-        next.click();
+        nextBtn.click();
       }
     };
 
